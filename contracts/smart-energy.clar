@@ -74,3 +74,32 @@
     (asserts! (>= new-limit (var-get current-system-load)) error-invalid-capacity)
     (var-set system-capacity-limit new-limit)
     (ok true)))
+
+;; Trading functions
+(define-public (list-energy (quantity uint) (rate uint))
+  (let (
+    (current-holdings (default-to u0 (map-get? user-energy-holdings tx-sender)))
+    (current-listed (get quantity (default-to {quantity: u0, rate: u0} 
+                   (map-get? energy-listing {provider: tx-sender}))))
+    (new-listing-amount (+ quantity current-listed))
+  )
+    (asserts! (> quantity u0) error-invalid-quantity)
+    (asserts! (> rate u0) error-invalid-rate)
+    (asserts! (>= current-holdings new-listing-amount) error-insufficient-funds)
+    (try! (update-system-load (to-int quantity)))
+    (map-set energy-listing {provider: tx-sender} 
+             {quantity: new-listing-amount, rate: rate})
+    (ok true)))
+
+(define-public (delist-energy (quantity uint))
+  (let (
+    (current-listed (get quantity (default-to {quantity: u0, rate: u0} 
+                   (map-get? energy-listing {provider: tx-sender}))))
+  )
+    (asserts! (>= current-listed quantity) error-insufficient-funds)
+    (try! (update-system-load (to-int (- quantity))))
+    (map-set energy-listing {provider: tx-sender} 
+             {quantity: (- current-listed quantity), 
+              rate: (get rate (default-to {quantity: u0, rate: u0} 
+                    (map-get? energy-listing {provider: tx-sender})))})
+    (ok true)))
