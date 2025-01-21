@@ -45,3 +45,32 @@
     (asserts! (<= new-load (var-get system-capacity-limit)) error-capacity-exceeded)
     (var-set current-system-load new-load)
     (ok true)))
+
+;; Admin functions
+(define-public (update-unit-price (new-rate uint))
+  (begin
+    (asserts! (is-eq tx-sender contract-admin) error-admin-only)
+    (asserts! (> new-rate u0) error-invalid-rate)
+    (var-set unit-price new-rate)
+    (ok true)))
+
+(define-public (update-platform-fee (new-fee uint))
+  (begin
+    (asserts! (is-eq tx-sender contract-admin) error-admin-only)
+    (asserts! (<= new-fee u100) error-invalid-fee-rate)
+    (var-set platform-fee new-fee)
+    (ok true)))
+
+(define-public (update-return-rate (new-rate uint))
+  (begin
+    (asserts! (is-eq tx-sender contract-admin) error-admin-only)
+    (asserts! (<= new-rate u100) error-invalid-fee-rate)
+    (var-set return-rate new-rate)
+    (ok true)))
+
+(define-public (update-system-capacity (new-limit uint))
+  (begin
+    (asserts! (is-eq tx-sender contract-admin) error-admin-only)
+    (asserts! (>= new-limit (var-get current-system-load)) error-invalid-capacity)
+    (var-set system-capacity-limit new-limit)
+    (ok true)))
