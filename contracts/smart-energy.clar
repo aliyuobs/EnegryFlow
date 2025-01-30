@@ -103,3 +103,32 @@
               rate: (get rate (default-to {quantity: u0, rate: u0} 
                     (map-get? energy-listing {provider: tx-sender})))})
     (ok true)))
+
+;; Read functions
+(define-read-only (get-current-price)
+  (ok (var-get unit-price)))
+
+(define-read-only (get-platform-fee)
+  (ok (var-get platform-fee)))
+
+(define-read-only (get-return-rate)
+  (ok (var-get return-rate)))
+
+(define-read-only (get-energy-balance (user principal))
+  (ok (default-to u0 (map-get? user-energy-holdings user))))
+
+(define-read-only (get-token-balance (user principal))
+  (ok (default-to u0 (map-get? user-token-holdings user))))
+
+(define-read-only (get-listed-energy (provider principal))
+  (ok (default-to {quantity: u0, rate: u0} 
+      (map-get? energy-listing {provider: provider}))))
+
+(define-read-only (get-user-capacity-limit)
+  (ok (var-get user-capacity-limit)))
+
+(define-read-only (get-system-load)
+  (ok (var-get current-system-load)))
+
+(define-read-only (get-system-capacity)
+  (ok (var-get system-capacity-limit)))
